@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blood Bank Optimization</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+    }
+    header {
+      background-color: #990000;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    nav ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      padding: 0;
+    }
+    nav ul li {
+      margin: 0 10px;
+    }
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+    }
+    section {
+      padding: 20px;
+      margin: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    form label, form input, form select, form button {
+      display: block;
+      margin-bottom: 10px;
+      width: 100%;
+      max-width: 400px;
+    }
+    form button {
+      background-color: #990000;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    form button:hover {
+      background-color: #cc0000;
+    }
+    .hidden {
+      display: none;
+    }
+    footer {
+      background-color: #990000;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Blood Bank Optimization</h1>
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#donor-form">Donate Blood</a></li>
+        <li><a href="#receiver-search">Request Blood</a></li>
+        <li><a href="#forecast">Blood Demand Forecast</a></li>
+      </ul>
+    </nav>
+  </header>
+  <section id="home">
+    <h2>Welcome to the Intelligent Blood Bank</h2>
+    <p>Leverage AI to optimize blood donation and distribution processes.</p>
+  </section>
+  <section id="donor-form">
+    <h2>Donor Registration</h2>
+    <form id="donorForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+      
+      <label for="phone">Phone Number:</label>
+      <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required>
+      
+      <label for="aadhaar">Aadhaar Number:</label>
+      <input type="text" id="aadhaar" name="aadhaar" pattern="[0-9]{12}" required>
+      
+      <label for="blood-type">Blood Type:</label>
+      <select id="blood-type" name="blood-type" required>
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+      </select>
+      
+      <label for="location">Location:</label>
+      <input type="text" id="location" name="location" required>
+      
+      <div id="otpSection" class="hidden">
+        <label for="otp">Enter OTP:</label>
+        <input type="text" id="otp" name="otp" pattern="[0-9]{6}">
+        <button type="button" id="verifyOTP">Verify OTP</button>
+      </div>
+      
+      <button type="button" id="sendOTP">Send OTP</button>
+      <button type="submit" id="submitDonor" disabled>Register</button>
+    </form>
+  </section>
+  <section id="receiver-search">
+    <h2>Request Blood</h2>
+    <p>Search for blood donors near you.</p>
+    <form id="receiverForm">
+      <label for="receiver-name">Name:</label>
+      <input type="text" id="receiver-name" name="receiver-name" required>
+      
+      <label for="receiver-phone">Phone Number:</label>
+      <input type="tel" id="receiver-phone" name="receiver-phone" pattern="[0-9]{10}" required>
+      
+      <label for="search-blood-type">Blood Type:</label>
+      <select id="search-blood-type" name="search-blood-type">
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+      </select>
+      
+      <div id="receiver-otp-section" class="hidden">
+        <label for="receiver-otp">Enter OTP:</label>
+        <input type="text" id="receiver-otp" name="receiver-otp" pattern="[0-9]{6}">
+        <button type="button" id="verifyReceiverOTP">Verify OTP</button>
+      </div>
+      
+      <button type="button" id="receiverSendOTP">Send OTP</button>
+      <button type="submit" id="searchDonors" disabled>Search Donors</button>
+    </form>
+    <div id="results"></div>
+  </section>
+  <section id="forecast">
+    <h2>Blood Demand Forecast</h2>
+    <p>Real-time predictions based on historical data and trends:</p>
+    <canvas id="forecastChart" width="400" height="200"></canvas>
+  </section>
+  <footer>
+    <p>Powered by Artificial Intelligence and Machine Learning</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // OTP Simulation Function
+    function generateOTP() {
+      return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    // Donor Form OTP Handling
+    const donorForm = document.getElementById('donorForm');
+    const sendOTPButton = document.getElementById('sendOTP');
+    const otpSection = document.getElementById('otpSection');
+    const verifyOTPButton = document.getElementById('verifyOTP');
+    const submitDonorButton = document.getElementById('submitDonor');
+
+    let donorOTP = '';
+
+    sendOTPButton.addEventListener('click', function() {
+      const phone = document.getElementById('phone').value;
+      if (phone.length === 10) {
+        donorOTP = generateOTP();
+        alert(`OTP sent to ${phone}: ${donorOTP}`);
+        otpSection.classList.remove('hidden');
+      } else {
+        alert('Please enter a valid 10-digit phone number');
+      }
+    });
+
+    verifyOTPButton.addEventListener('click', function() {
+      const enteredOTP = document.getElementById('otp').value;
+      if (enteredOTP === donorOTP) {
+        alert('OTP Verified Successfully!');
+        submitDonorButton.disabled = false;
+        verifyOTPButton.disabled = true;
+      } else {
+        alert('Incorrect OTP. Please try again.');
+      }
+    });
+
+    donorForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const aadhaar = document.getElementById('aadhaar').value;
+      const bloodType = document.getElementById('blood-type').value;
+      const location = document.getElementById('location').value;
+
+      alert(`Thank you, ${name}, for registering as a blood donor!`);
+      console.log({ name, phone, aadhaar, bloodType, location });
+    });
+
+    // Receiver Form OTP Handling
+    const receiverForm = document.getElementById('receiverForm');
+    const receiverSendOTPButton = document.getElementById('receiverSendOTP');
+    const receiverOTPSection = document.getElementById('receiver-otp-section');
+    const verifyReceiverOTPButton = document.getElementById('verifyReceiverOTP');
+    const searchDonorsButton = document.getElementById('searchDonors');
+
+    let receiverOTP = '';
+
+    receiverSendOTPButton.addEventListener('click', function() {
+      const phone = document.getElementById('receiver-phone').value;
+      if (phone.length === 10) {
+        receiverOTP = generateOTP();
+        alert(`OTP sent to ${phone}: ${receiverOTP}`);
+        receiverOTPSection.classList.remove('hidden');
+      } else {
+        alert('Please enter a valid 10-digit phone number');
+      }
+    });
+
+    verifyReceiverOTPButton.addEventListener('click', function() {
+      const enteredOTP = document.getElementById('receiver-otp').value;
+      if (enteredOTP === receiverOTP) {
+        alert('OTP Verified Successfully!');
+        searchDonorsButton.disabled = false;
+        verifyReceiverOTPButton.disabled = true;
+      } else {
+        alert('Incorrect OTP. Please try again.');
+      }
+    });
+
+    receiverForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const bloodType = document.getElementById('search-blood-type').value;
+      document.getElementById('results').innerHTML = `Searching for donors with blood type ${bloodType}...`;
+    });
+
+    // Chart (dummy data)
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+    const forecastChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['January', 'February', 'March', 'April', 'May'],
+        datasets: [{
+          label: 'Blood Demand',
+          data: [30, 40, 35, 50, 45],
+          borderColor: 'red',
+          fill: false,
+        }]
+      },
+      options: {
+        responsive: true,
+      }
+    });
+  </script>
+</body>
+</html>
